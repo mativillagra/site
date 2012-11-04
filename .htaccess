@@ -1,0 +1,30 @@
+RewriteEngine On
+RewriteCond %{HTTP_HOST} =miapp.hopto.org
+RewriteCond %{HTTPS} !=on
+RewriteRule ^admin(.*) https://%{HTTP_HOST}/site/admin$1 [R,L]
+
+
+
+#Options +FollowSymLinks -MultiViews
+#RewriteEngine On
+#RewriteBase /
+
+#RewriteCond %{HTTP_HOST} =miapp.hopto.org
+#RewriteCond %{REQUEST_URI} ^/admin*
+
+# force https for /login.php and /register.php
+#RewriteCond %{HTTPS} =off
+#RewriteRule ^(login|register)\.php$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# don't do anything for images/css/js (leave protocol as is)
+#RewriteRule \.(gif|jpe?g|png|css|js)$ - [NC,L]
+
+# force http for all other URLs
+#RewriteCond %{HTTPS} =on
+#RewriteCond %{REQUEST_URI} !^/(login|register)\.php$
+#RewriteRule .* http://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+
+#http://stackoverflow.com/questions/7206287/htaccess-how-to-set-ssl-on-certain-pages-script-needs-modifying
+
+
