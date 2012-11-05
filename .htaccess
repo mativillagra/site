@@ -27,4 +27,7 @@ RewriteRule ^admin(.*) https://%{HTTP_HOST}/site/admin$1 [R,L]
 
 #http://stackoverflow.com/questions/7206287/htaccess-how-to-set-ssl-on-certain-pages-script-needs-modifying
 
+#commnet
+
+
 
