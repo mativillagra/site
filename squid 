@@ -1,0 +1,72 @@
+
+
+#  TAG: dns_nameservers
+#       Use this if you want to specify a list of DNS name servers
+#       (IP addresses) to use instead of those given in your
+#       /etc/resolv.conf file.
+#       On Windows platforms, if no value is specified here or in
+#       the /etc/resolv.conf file, the list of DNS name servers are
+#       taken from the Windows registry, both static and dynamic DHCP
+#       configurations are supported.
+#
+#       Example: dns_nameservers 10.0.0.1 192.172.0.4
+#
+
+
+HowTo Clean and Re-build Squid cache
+
+
+First, Check you squid.conf file and locate the location of you cache directory, you should have line starting with "cache_dir"
+
+server2 /var/spool/squid 
+
+1. Shutdown your squid server
+
+2. rm -r /var/spool/squid/*
+
+3. Re-Create the squid cache directory
+  squid -z
+
+4. Start the squid
+
+
+To see the cache size
+Code:
+
+ 
+   du -hs /var/spool/squid/
+
+
+Where to Store Cached Data
+
+Cached Data has to be kept somewhere. In the section on hardware sizing, we discussed the size and number of drives to use for caching. Squid cannot autodetect where to store this data, though, so you need to let Squid know which directories it can use for data storage.
+
+The cache_dir operator in the squid.conf file is used to configure specific storage areas. If you use more than one disk for cached data, you may need more than one mount point (for example /usr/local/squid/cache1 for the first disk, /usr/local/squid/cache2 for the second). Squid allows you to have more than one cache_dir option in your config file.
+
+Let's consider only one cache_dir entry in the meantime. Here I am using the default values from the standard squid.conf.
+
+cache_dir ufs /usr/local/squid/var/cache/ 100 16 256
+
+The first option to the cache_dir tag sets the directory where data will be stored. The prefix value simply has /cache/ tagged onto the end and it's used as the default directory. This directory is also made by the make install command that we used earlier.
+
+The next option to cache_dir is straight forward: it's a size value. Squid will store up to that amount of data in that directory. The value is in megabytes, so of the cache store. The default is 100 megabytes.
+
+The other two options are more complex: they set the number of subdirectories (first and second tier) to create in this directory. Squid makes lots of directories and stores a few files in each of them in an attempt to speed up disk access (finding the correct entry in a directory with one million files in it is not efficient: it's better to split the files up into lots of smaller sets of files... don't worry too much about this for the moment). I suggest that you use the default values for these options in the mean time: if you have a very large cache store you may want to increase these values, but this is covered in the section on FIXME 
+
+
+What ''cache_dir'' size should I use?
+
+This chapter assumes that you are dedicating an entire disk partition to a squid cache_dir, as is often the case.
+
+Generally speaking, setting the cache_dir to be the same size as the disk partition is not a wise choice, for two reasons. The first is that squid is not very tolerant to running out of disk space. On top of the cache_dir size, squid will use some extra space for swap.state and then some more temporary storage as work-areas, for instance when rebuilding swap.state. So in any case make sure to leave some extra room for this, or your cache will enter an endless crash-restart cycle.
+
+The second reason is fragmentation (note, this won't apply to the COSS object storage engine - when it will be ready): filesystems can only do so much to avoid fragmentation, and in order to be effective they need to have the space to try and optimize file placement. If the disk is full, optimization is very hard, and when the disk is 100% full optimizing is plain impossible. Get your disk fragmented, and it will most likely be your worst bottleneck, by far offsetting the modest gain you got by having more storage.
+
+Let's see an example: you have a 9Gb disk (these times they're even hard to find..). First thing, manifacturers often lie about disk capacity (the whole Megabyte vs Mebibyte issue), and then the OS needs some space for its accounting structures, so you'll reasonably end up with 8Gib of useable space. You then have to account for another 10% in overhead for Squid, and then the space needed for keeping fragmentation at bay. So in the end the recommended cache_dir setting is 6000 to 7000 Mebibyte.
+
+cache_dir ... 7000 16 256
+
+Its better to start out with a conservative setting and then, after the cache has been filled, look at the disk usage. If you think there is plenty of unused space, then increase the cache_dir setting a little.
+
+If you're getting "disk full" write errors, then you definitely need to decrease your cache size. 
+
